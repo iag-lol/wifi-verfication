@@ -1,0 +1,1102 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+  <meta name="theme-color" content="#1f2937" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>WiFi - Verificación</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --primary-light: #93c5fd;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --error: #ef4444;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      height: 100%;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background: linear-gradient(135deg, #8ca0f8 0%, #fffef0 100%);
+      min-height: 100vh;
+      color: var(--gray-800);
+      line-height: 1.5;
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+    }
+
+    .app-container {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+      max-width: 100%;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-top: 1rem;
+    }
+
+    .header h1 {
+      color: white;
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .header p {
+      color: rgba(255,255,255,0.9);
+      font-size: 0.875rem;
+      line-height: 1.6;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    .main-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: var(--shadow-xl);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .card-content {
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .search-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .search-input-group {
+      position: relative;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .input {
+      flex: 1;
+      padding: 0.875rem 1rem;
+      border: 2px solid var(--gray-200);
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      background: white;
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .input[readonly] {
+      background: var(--gray-50);
+      color: var(--gray-600);
+      border-color: var(--gray-200);
+    }
+
+    .btn {
+      padding: 0.875rem 1.25rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--gray-100);
+      color: var(--gray-700);
+      border: 1px solid var(--gray-200);
+    }
+
+    .btn-secondary:hover {
+      background: var(--gray-200);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .info-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .info-grid.full-width {
+      grid-template-columns: 1fr;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--gray-700);
+    }
+
+    .wifi-section {
+      background: var(--gray-50);
+      border-radius: 16px;
+      padding: 1.5rem;
+      border: 2px dashed var(--gray-200);
+    }
+
+    .wifi-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .wifi-header h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+
+    .wifi-icon {
+      width: 24px;
+      height: 24px;
+      color: var(--primary);
+    }
+
+    .wifi-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .result-display {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 12px;
+      border: 1px solid var(--gray-200);
+      background: white;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    .status-success {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .status-warning {
+      background: rgba(245, 158, 11, 0.1);
+      color: var(--warning);
+    }
+
+    .status-error {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+    }
+
+    .location-info {
+      background: var(--gray-50);
+      border-radius: 12px;
+      padding: 1rem;
+      border: 1px solid var(--gray-200);
+      margin-top: 1rem;
+    }
+
+    .location-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .location-icon {
+      width: 20px;
+      height: 20px;
+      color: var(--primary);
+    }
+
+    .toast-container {
+      position: fixed;
+      top: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      max-width: calc(100vw - 2rem);
+    }
+
+    .toast {
+      background: var(--gray-900);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transform: translateY(-20px);
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast-success {
+      background: var(--success);
+    }
+
+    .toast-error {
+      background: var(--error);
+    }
+
+    .toast-warning {
+      background: var(--warning);
+    }
+
+    .loading-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top: 2px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .offline-banner {
+      background: var(--warning);
+      color: white;
+      padding: 0.75rem;
+      text-align: center;
+      font-size: 0.875rem;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .connection-status {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--success);
+      z-index: 999;
+      transition: background-color 0.3s ease;
+    }
+
+    .connection-status.offline {
+      background: var(--error);
+    }
+
+    /* Responsive design */
+    @media (max-width: 640px) {
+      .app-container {
+        padding: 0.75rem;
+      }
+
+      .card-content {
+        padding: 1rem;
+        gap: 1.25rem;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+
+      .search-input-group {
+        flex-direction: column;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        padding: 1rem;
+        width: 100%;
+      }
+
+      .wifi-section {
+        padding: 1rem;
+      }
+
+      .header h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    @media (max-width: 375px) {
+      .app-container {
+        padding: 0.5rem;
+      }
+      
+      .card-content {
+        padding: 0.75rem;
+      }
+
+      .header {
+        margin-bottom: 1.5rem;
+      }
+    }
+
+    /* PWA styles */
+    @media (display-mode: standalone) {
+      body {
+        -webkit-user-select: none;
+        user-select: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="connection-status" id="connectionStatus"></div>
+  <div class="toast-container" id="toastContainer"></div>
+  
+  <div class="app-container">
+    <header class="header">
+      <h1>🚌 Flota WiFi</h1>
+      <p>Verifica la conectividad WiFi de los buses</p>
+    </header>
+
+    <div class="main-card">
+      <div class="card-content">
+        <!-- Search Section -->
+        <section class="search-section">
+          <div class="search-input-group">
+            <input 
+              type="text" 
+              class="input" 
+              id="searchInput" 
+              placeholder="Ingresa PPU o número interno"
+              autocomplete="off"
+            />
+            <button class="btn btn-primary" id="btnSearch">
+              <span id="searchIcon">🔍</span>
+              <span id="searchText">Buscar</span>
+            </button>
+          </div>
+          <button class="btn btn-secondary" id="btnClear">
+            🗑️ Limpiar datos
+          </button>
+        </section>
+
+        <!-- Bus Info Section -->
+        <section class="bus-info">
+          <div class="info-grid">
+            <div class="form-group">
+              <label class="label" for="ppu">PPU</label>
+              <input type="text" class="input" id="ppu" readonly />
+            </div>
+            <div class="form-group">
+              <label class="label" for="numero_interno">N° Interno</label>
+              <input type="text" class="input" id="numero_interno" readonly />
+            </div>
+          </div>
+          
+          <div class="info-grid full-width">
+            <div class="form-group">
+              <label class="label" for="marca">Marca</label>
+              <input type="text" class="input" id="marca" readonly />
+            </div>
+          </div>
+
+          <!-- Location Info -->
+          <div class="location-info" id="locationInfo" style="display: none;">
+            <div class="location-header">
+              <svg class="location-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              <span class="label">Ubicación detectada</span>
+            </div>
+            <div class="info-grid">
+              <div class="form-group">
+                <label class="label" for="terminal">Terminal</label>
+                <input type="text" class="input" id="terminal" readonly />
+              </div>
+              <div class="form-group">
+                <label class="label" for="distancia">Distancia</label>
+                <input type="text" class="input" id="distancia" readonly />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- WiFi Verification Section -->
+        <section class="wifi-section">
+          <div class="wifi-header">
+            <svg class="wifi-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
+            </svg>
+            <h3>Verificación WiFi</h3>
+          </div>
+          
+          <div class="wifi-inputs">
+            <div class="form-group">
+              <label class="label" for="wifi_ssid">SSID Observado</label>
+              <input 
+                type="text" 
+                class="input" 
+                id="wifi_ssid" 
+                placeholder="ej: Red-abc123"
+                autocomplete="off"
+              />
+            </div>
+            <div class="form-group">
+              <label class="label" for="wifi_pass">Contraseña Observada</label>
+              <input 
+                type="password" 
+                class="input" 
+                id="wifi_pass" 
+                placeholder="ej: busabc123"
+                autocomplete="off"
+              />
+            </div>
+          </div>
+
+          <div class="button-group">
+            <button class="btn btn-secondary" id="btnValidate">
+              ✓ Validar WiFi
+            </button>
+            <button class="btn btn-primary" id="btnSave">
+              💾 Guardar Verificación
+            </button>
+          </div>
+
+          <div class="result-display" id="resultDisplay" style="display: none;">
+            <div class="label" style="margin-bottom: 0.5rem;">Resultado:</div>
+            <div id="verificationResult"></div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+
+    // Configuration
+    const SUPABASE_URL = 'https://tcmtxvuucjttngcazgff.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjbXR4dnV1Y2p0dG5nY2F6Z2ZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA3MjUwMDEsImV4cCI6MjA1NjMwMTAwMX0.2WcIjMUEhSM6j9kYpbsYArQocZdHx86k7wXk-NyjIs0'
+
+    let supabase = null
+    let isOnline = navigator.onLine
+    let offlineData = JSON.parse(localStorage.getItem('flotaWifiOfflineData') || '{}')
+
+    // Initialize Supabase only when online
+    function initSupabase() {
+      if (isOnline) {
+        try {
+          supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: false } })
+        } catch (error) {
+          console.warn('Could not initialize Supabase:', error)
+        }
+      }
+    }
+
+    // Terminals configuration
+    const TERMINALES = [
+      { id: 'el_roble', name: 'El Roble', lat: -33.440738802359135, lon: -70.78973603012007 },
+      { id: 'la_reina', name: 'La Reina', lat: -33.46489886764489, lon: -70.5318572221778 },
+      { id: 'el_descanso', name: 'El Descanso', lat: -33.469416628128414, lon: -70.76232663011909 },
+      { id: 'maria_angelica', name: 'María Angélica', lat: -33.517677677614884, lon: -70.55638713011739 },
+      { id: 'colocolo', name: 'Colo Colo', lat: -33.36254019925526, lon: -70.76221639800895 },
+      { id: 'lo_echevers', name: 'Lo Echevers', lat: -33.37369394011573, lon: -70.7581138166298 },
+      { id: 'el_salto', name: 'El Salto', lat: -33.387149688373356, lon: -70.62233064471403 }
+    ]
+
+    // DOM Elements
+    const elements = {
+      connectionStatus: document.getElementById('connectionStatus'),
+      toastContainer: document.getElementById('toastContainer'),
+      searchInput: document.getElementById('searchInput'),
+      btnSearch: document.getElementById('btnSearch'),
+      btnClear: document.getElementById('btnClear'),
+      ppu: document.getElementById('ppu'),
+      numeroInterno: document.getElementById('numero_interno'),
+      marca: document.getElementById('marca'),
+      terminal: document.getElementById('terminal'),
+      distancia: document.getElementById('distancia'),
+      locationInfo: document.getElementById('locationInfo'),
+      wifiSsid: document.getElementById('wifi_ssid'),
+      wifiPass: document.getElementById('wifi_pass'),
+      btnValidate: document.getElementById('btnValidate'),
+      btnSave: document.getElementById('btnSave'),
+      resultDisplay: document.getElementById('resultDisplay'),
+      verificationResult: document.getElementById('verificationResult'),
+      searchIcon: document.getElementById('searchIcon'),
+      searchText: document.getElementById('searchText')
+    }
+
+    // State
+    let currentBus = null
+    let selectedTerminal = null
+    let lastDistance = null
+
+    // Utility Functions
+    function showToast(message, type = 'info', duration = 3000) {
+      const toast = document.createElement('div')
+      toast.className = `toast toast-${type}`
+      
+      const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : 'ℹ️'
+      toast.innerHTML = `${icon} ${message}`
+      
+      elements.toastContainer.appendChild(toast)
+      
+      setTimeout(() => toast.classList.add('show'), 100)
+      setTimeout(() => toast.classList.remove('show'), duration - 300)
+      setTimeout(() => elements.toastContainer.removeChild(toast), duration)
+    }
+
+    function haversineDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371000 // Earth's radius in meters
+      const toRad = x => x * Math.PI / 180
+      const dLat = toRad(lat2 - lat1)
+      const dLon = toRad(lon2 - lon1)
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + 
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2)
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+      return R * c
+    }
+
+    function sanitizePpu(ppu) {
+      return String(ppu || '').toLowerCase().replace(/[^a-z0-9]/g, '')
+    }
+
+    function getExpectedWifi(ppu) {
+      const sanitized = sanitizePpu(ppu)
+      return {
+        ssid: `Red-${sanitized}`,
+        password: `bus${sanitized}`
+      }
+    }
+
+    function validateWifi(ppu, observedSsid, observedPassword) {
+      if (!ppu) return { valid: false, reason: 'PPU requerido' }
+      
+      const expected = getExpectedWifi(ppu)
+      const ssidMatch = String(observedSsid || '').toLowerCase() === expected.ssid.toLowerCase()
+      const passwordMatch = String(observedPassword || '').toLowerCase() === expected.password.toLowerCase()
+      
+      return {
+        valid: ssidMatch && passwordMatch,
+        ssidMatch,
+        passwordMatch,
+        expected
+      }
+    }
+
+    function updateConnectionStatus() {
+      isOnline = navigator.onLine
+      elements.connectionStatus.className = `connection-status ${isOnline ? '' : 'offline'}`
+      
+      if (isOnline && !supabase) {
+        initSupabase()
+      }
+    }
+
+    function setLoading(button, isLoading) {
+      const textEl = button.querySelector('span:last-child')
+      const iconEl = button.querySelector('span:first-child')
+      
+      if (isLoading) {
+        button.disabled = true
+        iconEl.innerHTML = '<div class="loading-spinner"></div>'
+        textEl.textContent = 'Cargando...'
+      } else {
+        button.disabled = false
+      }
+    }
+
+    // Location Functions
+    function detectLocation() {
+      if (!navigator.geolocation) {
+        elements.terminal.value = 'Geolocalización no disponible'
+        showToast('Geolocalización no disponible', 'warning')
+        return
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords
+          let closestTerminal = null
+          let minDistance = Infinity
+
+          TERMINALES.forEach(terminal => {
+            const distance = haversineDistance(latitude, longitude, terminal.lat, terminal.lon)
+            if (distance < minDistance) {
+              minDistance = distance
+              closestTerminal = terminal
+            }
+          })
+
+          if (closestTerminal) {
+            selectedTerminal = closestTerminal
+            lastDistance = Math.round(minDistance)
+            elements.terminal.value = closestTerminal.name
+            elements.distancia.value = `${lastDistance}m`
+            elements.locationInfo.style.display = 'block'
+            showToast(`Terminal detectada: ${closestTerminal.name}`, 'success')
+          }
+        },
+        (error) => {
+          elements.terminal.value = 'Error de ubicación'
+          elements.locationInfo.style.display = 'block'
+          showToast('No se pudo obtener la ubicación', 'error')
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 300000
+        }
+      )
+    }
+
+    // Bus Search Functions
+    async function searchBus(query) {
+      if (!query.trim()) {
+        showToast('Ingresa PPU o número interno', 'warning')
+        return
+      }
+
+      setLoading(elements.btnSearch, true)
+
+      try {
+        // Try online search first
+        if (isOnline && supabase) {
+          const { data, error } = await supabase
+            .from('buses')
+            .select('id,ppu,numero_interno,marca')
+            .or(`ppu.eq.${query},numero_interno.eq.${query}`)
+            .limit(1)
+
+          if (error) throw error
+
+          if (data && data.length > 0) {
+            currentBus = data[0]
+            // Cache the result for offline use
+            offlineData[query] = currentBus
+            localStorage.setItem('flotaWifiOfflineData', JSON.stringify(offlineData))
+            displayBusInfo(currentBus)
+            showToast('Bus encontrado', 'success')
+            return
+          }
+        }
+
+        // Fallback to offline data
+        const offlineResult = offlineData[query]
+        if (offlineResult) {
+          currentBus = offlineResult
+          displayBusInfo(currentBus)
+          showToast('Bus encontrado (datos offline)', 'success')
+          return
+        }
+
+        // No results found
+        currentBus = null
+        clearBusInfo()
+        showToast('Bus no encontrado', 'warning')
+
+      } catch (error) {
+        console.error('Search error:', error)
+        showToast('Error en la búsqueda', 'error')
+      } finally {
+        setLoading(elements.btnSearch, false)
+        elements.searchIcon.textContent = '🔍'
+        elements.searchText.textContent = 'Buscar'
+      }
+    }
+
+    function displayBusInfo(bus) {
+      elements.ppu.value = bus.ppu || ''
+      elements.numeroInterno.value = bus.numero_interno || ''
+      elements.marca.value = bus.marca || ''
+    }
+
+    function clearBusInfo() {
+      elements.ppu.value = ''
+      elements.numeroInterno.value = ''
+      elements.marca.value = ''
+    }
+
+    function clearForm() {
+      elements.searchInput.value = ''
+      clearBusInfo()
+      elements.wifiSsid.value = ''
+      elements.wifiPass.value = ''
+      elements.resultDisplay.style.display = 'none'
+      currentBus = null
+    }
+
+    // WiFi Validation Functions
+    function performValidation() {
+      if (!currentBus) {
+        showToast('Primero busca un bus', 'warning')
+        return
+      }
+
+      const validation = validateWifi(
+        currentBus.ppu,
+        elements.wifiSsid.value.trim(),
+        elements.wifiPass.value.trim()
+      )
+
+      displayValidationResult(validation)
+    }
+
+    function displayValidationResult(validation) {
+      elements.resultDisplay.style.display = 'block'
+
+      if (validation.valid) {
+        elements.verificationResult.innerHTML = `
+          <div class="status-badge status-success">
+            ✅ WiFi Válido
+          </div>
+        `
+        showToast('WiFi coincide correctamente', 'success')
+      } else {
+        const issues = []
+        if (!validation.ssidMatch) issues.push('SSID incorrecto')
+        if (!validation.passwordMatch) issues.push('Contraseña incorrecta')
+        
+        elements.verificationResult.innerHTML = `
+          <div class="status-badge status-error">
+            ❌ ${issues.join(' • ')}
+          </div>
+          <div style="margin-top: 0.75rem; font-size: 0.875rem; color: var(--gray-600);">
+            <div><strong>Esperado:</strong></div>
+            <div>SSID: ${validation.expected.ssid}</div>
+            <div>Pass: ${validation.expected.password}</div>
+          </div>
+        `
+        showToast('WiFi no coincide', 'error')
+      }
+    }
+
+    async function saveVerification() {
+      if (!currentBus) {
+        showToast('Primero busca un bus', 'warning')
+        return
+      }
+
+      const validation = validateWifi(
+        currentBus.ppu,
+        elements.wifiSsid.value.trim(),
+        elements.wifiPass.value.trim()
+      )
+
+      const verificationData = {
+        bus_id: currentBus.id,
+        ppu: currentBus.ppu,
+        numero_interno: currentBus.numero_interno,
+        marca: currentBus.marca,
+        ssid_observed: elements.wifiSsid.value.trim() || null,
+        pass_observed: elements.wifiPass.value.trim() || null,
+        verified: validation.valid,
+        terminal: selectedTerminal ? selectedTerminal.id : null,
+        terminal_name: selectedTerminal ? selectedTerminal.name : null,
+        distance_m: lastDistance || null,
+        checked_at: new Date().toISOString()
+      }
+
+      setLoading(elements.btnSave, true)
+
+      try {
+        if (isOnline && supabase) {
+          // Save to database
+          const { data, error } = await supabase
+            .from('wifi_checks')
+            .upsert([verificationData], { onConflict: 'bus_id' })
+            .select()
+
+          if (error) throw error
+          showToast('Verificación guardada exitosamente', 'success')
+        } else {
+          // Save to local storage for offline sync
+          const offlineVerifications = JSON.parse(localStorage.getItem('flotaWifiOfflineVerifications') || '[]')
+          offlineVerifications.push({ ...verificationData, pendingSync: true })
+          localStorage.setItem('flotaWifiOfflineVerifications', JSON.stringify(offlineVerifications))
+          showToast('Verificación guardada offline (se sincronizará cuando haya conexión)', 'warning')
+        }
+
+        displayValidationResult(validation)
+
+      } catch (error) {
+        console.error('Save error:', error)
+        showToast('Error al guardar verificación', 'error')
+      } finally {
+        setLoading(elements.btnSave, false)
+      }
+    }
+
+    // Offline sync function
+    async function syncOfflineData() {
+      if (!isOnline || !supabase) return
+
+      const offlineVerifications = JSON.parse(localStorage.getItem('flotaWifiOfflineVerifications') || '[]')
+      const pendingSync = offlineVerifications.filter(v => v.pendingSync)
+
+      if (pendingSync.length === 0) return
+
+      try {
+        for (const verification of pendingSync) {
+          delete verification.pendingSync
+          await supabase.from('wifi_checks').upsert([verification], { onConflict: 'bus_id' })
+        }
+
+        // Remove synced items
+        const remainingVerifications = offlineVerifications.filter(v => !v.pendingSync)
+        localStorage.setItem('flotaWifiOfflineVerifications', JSON.stringify(remainingVerifications))
+        
+        if (pendingSync.length > 0) {
+          showToast(`${pendingSync.length} verificaciones sincronizadas`, 'success')
+        }
+      } catch (error) {
+        console.error('Sync error:', error)
+      }
+    }
+
+    // Event Listeners
+    elements.btnSearch.addEventListener('click', () => {
+      searchBus(elements.searchInput.value.trim())
+    })
+
+    elements.searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        searchBus(elements.searchInput.value.trim())
+      }
+    })
+
+    elements.btnClear.addEventListener('click', clearForm)
+
+    elements.btnValidate.addEventListener('click', performValidation)
+
+    elements.btnSave.addEventListener('click', saveVerification)
+
+    // Network event listeners
+    window.addEventListener('online', () => {
+      updateConnectionStatus()
+      showToast('Conexión restaurada', 'success')
+      syncOfflineData()
+    })
+
+    window.addEventListener('offline', () => {
+      updateConnectionStatus()
+      showToast('Modo offline activado', 'warning')
+    })
+
+    // Auto-fill expected WiFi values when PPU is available
+    elements.wifiSsid.addEventListener('focus', () => {
+      if (currentBus && !elements.wifiSsid.value) {
+        const expected = getExpectedWifi(currentBus.ppu)
+        elements.wifiSsid.placeholder = `Esperado: ${expected.ssid}`
+      }
+    })
+
+    elements.wifiPass.addEventListener('focus', () => {
+      if (currentBus && !elements.wifiPass.value) {
+        const expected = getExpectedWifi(currentBus.ppu)
+        elements.wifiPass.placeholder = `Esperado: ${expected.password}`
+      }
+    })
+
+    // Show/hide password toggle
+    elements.wifiPass.addEventListener('dblclick', (e) => {
+      e.target.type = e.target.type === 'password' ? 'text' : 'password'
+    })
+
+    // Initialize app
+    function initializeApp() {
+      updateConnectionStatus()
+      initSupabase()
+      detectLocation()
+      
+      // Try to sync offline data if online
+      if (isOnline) {
+        syncOfflineData()
+      }
+
+      // Auto-focus search input
+      elements.searchInput.focus()
+    }
+
+    // PWA Installation
+    let deferredPrompt = null
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault()
+      deferredPrompt = e
+      
+      // Show install hint after a delay
+      setTimeout(() => {
+        showToast('💡 Puedes instalar esta app para usar sin conexión', 'info', 5000)
+      }, 3000)
+    })
+
+    // Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').then(() => {
+        console.log('Service Worker registered successfully')
+      }).catch((error) => {
+        console.log('Service Worker registration failed:', error)
+      })
+    }
+
+    // Start the app
+    initializeApp()
+
+    // Expose functions for debugging
+    window.flotaWifiApp = {
+      currentBus,
+      selectedTerminal,
+      isOnline,
+      syncOfflineData,
+      clearOfflineData: () => {
+        localStorage.removeItem('flotaWifiOfflineData')
+        localStorage.removeItem('flotaWifiOfflineVerifications')
+        showToast('Datos offline eliminados', 'info')
+      }
+    }
+  </script>
+
+  <!-- Service Worker for offline functionality -->
+  <script>
+    // Inline service worker code for demo purposes
+    const swCode = `
+      const CACHE_NAME = 'flota-wifi-v1'
+      const urlsToCache = [
+        '/',
+        '/index.html',
+        'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap',
+        'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+      ]
+
+      self.addEventListener('install', (event) => {
+        event.waitUntil(
+          caches.open(CACHE_NAME)
+            .then((cache) => cache.addAll(urlsToCache))
+        )
+      })
+
+      self.addEventListener('fetch', (event) => {
+        event.respondWith(
+          caches.match(event.request)
+            .then((response) => {
+              if (response) {
+                return response
+              }
+              return fetch(event.request)
+            })
+        )
+      })
+    `
+
+    // Register service worker with inline code
+    if ('serviceWorker' in navigator) {
+      const blob = new Blob([swCode], { type: 'application/javascript' })
+      const swUrl = URL.createObjectURL(blob)
+      
+      navigator.serviceWorker.register(swUrl).then(() => {
+        console.log('Inline Service Worker registered')
+      }).catch((error) => {
+        console.log('Service Worker registration failed:', error)
+      })
+    }
+  </script>
+</body>
+</html>
