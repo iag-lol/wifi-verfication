@@ -381,6 +381,27 @@
       background: var(--error);
     }
 
+      /* Table section */
+      .checks-section {
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        margin-top: 1rem;
+        padding: 1rem;
+        border: 1px solid var(--gray-200);
+      }
+      .checks-section h3 {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: 0.5rem;
+      }
+      .checks-section p {
+        color: var(--gray-600);
+        font-size: 0.875rem;
+        margin-bottom: 0.75rem;
+      }
+
     /* Responsive design */
     @media (max-width: 640px) {
       .app-container {
@@ -440,6 +461,9 @@
         user-select: none;
       }
     }
+
+
+    
   </style>
 </head>
 <body>
@@ -546,6 +570,18 @@
                 autocomplete="off"
               />
             </div>
+            <div class="form-group">
+              <label class="label" for="connection_status_select">Estado de conexión</label>
+              <select id="connection_status_select" class="input">
+                <option value="success">Conexión exitosa</option>
+                <option value="unstable">Conexión inestable</option>
+                <option value="failed">No se puede conectar</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="label" for="observation">Observación</label>
+              <textarea id="observation" class="input" rows="3" placeholder="Describe brevemente lo observado (opcional)"></textarea>
+            </div>
           </div>
 
           <div class="button-group">
@@ -564,6 +600,13 @@
         </section>
       </div>
     </div>
+    
+    <!-- Checks Table Section -->
+    <section class="checks-section">
+      <h3>Registros recientes</h3>
+      <p>Tabla responsiva con los últimos registros guardados. Se actualiza automáticamente.</p>
+      <div id="checksTableContainer"></div>
+    </section>
   </div>
 
   <script type="module">
@@ -614,6 +657,8 @@
       locationInfo: document.getElementById('locationInfo'),
       wifiSsid: document.getElementById('wifi_ssid'),
       wifiPass: document.getElementById('wifi_pass'),
+      connectionStatusSelect: document.getElementById('connection_status_select'),
+      observation: document.getElementById('observation'),
       btnValidate: document.getElementById('btnValidate'),
       btnSave: document.getElementById('btnSave'),
       resultDisplay: document.getElementById('resultDisplay'),
@@ -819,6 +864,8 @@
       clearBusInfo()
       elements.wifiSsid.value = ''
       elements.wifiPass.value = ''
+      if (elements.connectionStatusSelect) elements.connectionStatusSelect.value = 'success'
+      if (elements.observation) elements.observation.value = ''
       elements.resultDisplay.style.display = 'none'
       currentBus = null
     }
@@ -888,6 +935,8 @@
         ssid_observed: elements.wifiSsid.value.trim() || null,
         pass_observed: elements.wifiPass.value.trim() || null,
         verified: validation.valid,
+        connection_status: elements.connectionStatusSelect ? elements.connectionStatusSelect.value : null,
+        observation: elements.observation ? elements.observation.value.trim() || null : null,
         terminal: selectedTerminal ? selectedTerminal.id : null,
         terminal_name: selectedTerminal ? selectedTerminal.name : null,
         distance_m: lastDistance || null,
@@ -899,10 +948,24 @@
       try {
         if (isOnline && supabase) {
           // Save to database
-          const { data, error } = await supabase
+          let { data, error } = await supabase
             .from('wifi_checks')
             .upsert([verificationData], { onConflict: 'bus_id' })
             .select()
+
+          // If columns do not exist, retry without extra fields
+          if (error && (String(error.message || '').includes('column') || String(error.code || '') === '42703')) {
+            const minimalData = { ...verificationData }
+            delete minimalData.connection_status
+            delete minimalData.observation
+            ;({ data, error } = await supabase
+              .from('wifi_checks')
+              .upsert([minimalData], { onConflict: 'bus_id' })
+              .select())
+            if (!error) {
+              showToast('Guardado sin observación/estado (no definidos en la base)', 'warning')
+            }
+          }
 
           if (error) throw error
           showToast('Verificación guardada exitosamente', 'success')
@@ -921,6 +984,102 @@
         showToast('Error al guardar verificación', 'error')
       } finally {
         setLoading(elements.btnSave, false)
+      }
+    }
+
+    // Table rendering for recent checks
+    const tableState = {
+      rows: []
+    }
+
+    function renderChecksTable() {
+      const containerId = 'checksTableContainer'
+      let container = document.getElementById(containerId)
+      if (!container) return
+
+      const rows = tableState.rows || []
+
+      const headerHtml = `
+        <div style="overflow:auto;">
+          <table style="width:100%; border-collapse:collapse; min-width:720px;">
+            <thead>
+              <tr>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid var(--gray-200);">Fecha</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid var(--gray-200);">PPU</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid var(--gray-200);">Interno</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid var(--gray-200);">Marca</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid var(--gray-200);">Terminal</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid var(--gray-200);">Resultado</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid var(--gray-200);">Estado Conexión</th>
+                <th style="text-align:left; padding:8px; border-bottom:1px solid var(--gray-200);">SSID</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(r => {
+                const fecha = r.checked_at ? new Date(r.checked_at).toLocaleString() : ''
+                const estado = r.verified ? '✅ Válido' : '❌ No válido'
+                const conn = r.connection_status === 'failed' ? '❌ No conecta' : (r.connection_status === 'unstable' ? '⚠️ Inestable' : (r.connection_status === 'success' ? '✅ OK' : ''))
+                return `
+                  <tr>
+                    <td style=\"padding:8px; border-bottom:1px solid var(--gray-100);\">${fecha}</td>
+                    <td style=\"padding:8px; border-bottom:1px solid var(--gray-100);\">${r.ppu || ''}</td>
+                    <td style=\"padding:8px; border-bottom:1px solid var(--gray-100);\">${r.numero_interno || ''}</td>
+                    <td style=\"padding:8px; border-bottom:1px solid var(--gray-100);\">${r.marca || ''}</td>
+                    <td style=\"padding:8px; border-bottom:1px solid var(--gray-100);\">${r.terminal_name || r.terminal || ''}</td>
+                    <td style=\"padding:8px; border-bottom:1px solid var(--gray-100);\">${estado}</td>
+                    <td style=\"padding:8px; border-bottom:1px solid var(--gray-100);\">${conn}</td>
+                    <td style=\"padding:8px; border-bottom:1px solid var(--gray-100);\">${r.ssid_observed || ''}</td>
+                  </tr>
+                `
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `
+
+      container.innerHTML = headerHtml
+    }
+
+    async function loadInitialChecks() {
+      if (!(isOnline && supabase)) return
+      try {
+        const { data, error } = await supabase
+          .from('wifi_checks')
+          .select('id, ppu, numero_interno, marca, terminal, terminal_name, verified, ssid_observed, checked_at, connection_status')
+          .order('checked_at', { ascending: false })
+          .limit(50)
+        if (error) throw error
+        tableState.rows = Array.isArray(data) ? data : []
+        renderChecksTable()
+      } catch (e) {
+        console.warn('No se pudo cargar la tabla:', e)
+      }
+    }
+
+    function subscribeRealtime() {
+      if (!(isOnline && supabase)) return
+      try {
+        const channel = supabase
+          .channel('wifi_checks_changes')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'wifi_checks' }, payload => {
+            const row = payload.new || payload.old
+            if (!row) return
+            // Update or insert
+            const idx = (tableState.rows || []).findIndex(r => r.id === row.id)
+            if (idx >= 0) {
+              tableState.rows[idx] = { ...tableState.rows[idx], ...row }
+            } else {
+              tableState.rows.unshift(row)
+              tableState.rows = tableState.rows.slice(0, 50)
+            }
+            renderChecksTable()
+          })
+          .subscribe()
+
+        // Store for debug
+        window.flotaWifiApp = { ...(window.flotaWifiApp || {}), channel }
+      } catch (e) {
+        console.warn('No se pudo suscribir a cambios en tiempo real:', e)
       }
     }
 
@@ -1009,6 +1168,8 @@
       // Try to sync offline data if online
       if (isOnline) {
         syncOfflineData()
+        loadInitialChecks()
+        subscribeRealtime()
       }
 
       // Auto-focus search input
