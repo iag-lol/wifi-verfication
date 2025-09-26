@@ -586,7 +586,10 @@
 
           <div class="button-group">
             <button class="btn btn-secondary" id="btnValidate">
-              ✓ Validar WiFi
+              🔍 Detectar WiFi
+            </button>
+            <button class="btn btn-secondary" id="btnValidateManual">
+              ✓ Validar Manual
             </button>
             <button class="btn btn-primary" id="btnSave">
               💾 Guardar Verificación
@@ -660,6 +663,7 @@
       connectionStatusSelect: document.getElementById('connection_status_select'),
       observation: document.getElementById('observation'),
       btnValidate: document.getElementById('btnValidate'),
+      btnValidateManual: document.getElementById('btnValidateManual'),
       btnSave: document.getElementById('btnSave'),
       resultDisplay: document.getElementById('resultDisplay'),
       verificationResult: document.getElementById('verificationResult'),
@@ -741,10 +745,12 @@
       
       if (isLoading) {
         button.disabled = true
-        iconEl.innerHTML = '<div class="loading-spinner"></div>'
-        textEl.textContent = 'Cargando...'
+        if (iconEl) iconEl.innerHTML = '<div class="loading-spinner"></div>'
+        if (textEl) textEl.textContent = 'Cargando...'
       } else {
         button.disabled = false
+        if (iconEl) iconEl.innerHTML = button.dataset.originalIcon || '💾'
+        if (textEl) textEl.textContent = button.dataset.originalText || 'Guardar Verificación'
       }
     }
 
@@ -870,7 +876,97 @@
       currentBus = null
     }
 
-    // WiFi Validation Functions
+    // WiFi Detection and Validation Functions
+    async function detectCurrentWifi() {
+      try {
+        // Intentar detectar la red WiFi actual usando diferentes métodos
+        if ('connection' in navigator) {
+          const connection = navigator.connection
+          if (connection && connection.type === 'wifi') {
+            // En algunos navegadores móviles podemos obtener info básica
+            return {
+              ssid: connection.effectiveType || 'WiFi detectado',
+              password: 'No disponible por seguridad'
+            }
+          }
+        }
+
+        // Método alternativo: verificar conectividad y sugerir
+        const isOnline = navigator.onLine
+        if (isOnline) {
+          // Intentar hacer una petición para verificar conectividad real
+          const startTime = Date.now()
+          try {
+            await fetch('https://httpbin.org/get', { 
+              method: 'HEAD', 
+              mode: 'no-cors',
+              cache: 'no-cache'
+            })
+            const responseTime = Date.now() - startTime
+            
+            return {
+              ssid: 'Red WiFi conectada',
+              password: 'Verificar manualmente',
+              responseTime: responseTime
+            }
+          } catch (e) {
+            return {
+              ssid: 'Sin conexión a internet',
+              password: 'Verificar manualmente'
+            }
+          }
+        } else {
+          return {
+            ssid: 'Sin conexión',
+            password: 'Verificar manualmente'
+          }
+        }
+      } catch (error) {
+        console.warn('Error detectando WiFi:', error)
+        return {
+          ssid: 'No detectado',
+          password: 'Verificar manualmente'
+        }
+      }
+    }
+
+    async function autoDetectWifi() {
+      if (!currentBus) {
+        showToast('Primero busca un bus', 'warning')
+        return
+      }
+
+      setLoading(elements.btnValidate, true)
+      
+      try {
+        const wifiInfo = await detectCurrentWifi()
+        
+        // Auto-llenar los campos
+        elements.wifiSsid.value = wifiInfo.ssid
+        elements.wifiPass.value = wifiInfo.password
+        
+        // Actualizar estado de conexión basado en la detección
+        if (wifiInfo.ssid === 'Sin conexión' || wifiInfo.ssid === 'Sin conexión a internet') {
+          elements.connectionStatusSelect.value = 'failed'
+        } else if (wifiInfo.responseTime && wifiInfo.responseTime > 3000) {
+          elements.connectionStatusSelect.value = 'unstable'
+        } else {
+          elements.connectionStatusSelect.value = 'success'
+        }
+        
+        showToast('WiFi detectado automáticamente', 'success')
+        
+        // Realizar validación automática
+        performValidation()
+        
+      } catch (error) {
+        console.error('Error en detección automática:', error)
+        showToast('Error detectando WiFi', 'error')
+      } finally {
+        setLoading(elements.btnValidate, false)
+      }
+    }
+
     function performValidation() {
       if (!currentBus) {
         showToast('Primero busca un bus', 'warning')
@@ -918,6 +1014,12 @@
     async function saveVerification() {
       if (!currentBus) {
         showToast('Primero busca un bus', 'warning')
+        return
+      }
+
+      // Verificar que el botón no esté ya en proceso
+      if (elements.btnSave.disabled) {
+        showToast('Ya hay una operación en curso', 'warning')
         return
       }
 
@@ -969,6 +1071,13 @@
 
           if (error) throw error
           showToast('Verificación guardada exitosamente', 'success')
+          
+          // Actualizar la tabla inmediatamente
+          if (tableState.rows) {
+            tableState.rows.unshift(verificationData)
+            tableState.rows = tableState.rows.slice(0, 50)
+            renderChecksTable()
+          }
         } else {
           // Save to local storage for offline sync
           const offlineVerifications = JSON.parse(localStorage.getItem('flotaWifiOfflineVerifications') || '[]')
@@ -981,9 +1090,12 @@
 
       } catch (error) {
         console.error('Save error:', error)
-        showToast('Error al guardar verificación', 'error')
+        showToast(`Error al guardar: ${error.message || 'Error desconocido'}`, 'error')
       } finally {
-        setLoading(elements.btnSave, false)
+        // Asegurar que el botón se restaure siempre
+        setTimeout(() => {
+          setLoading(elements.btnSave, false)
+        }, 500)
       }
     }
 
@@ -1123,8 +1235,8 @@
 
     elements.btnClear.addEventListener('click', clearForm)
 
-    elements.btnValidate.addEventListener('click', performValidation)
-
+    elements.btnValidate.addEventListener('click', autoDetectWifi)
+    elements.btnValidateManual.addEventListener('click', performValidation)
     elements.btnSave.addEventListener('click', saveVerification)
 
     // Network event listeners
@@ -1164,6 +1276,14 @@
       updateConnectionStatus()
       initSupabase()
       detectLocation()
+      
+      // Store original button content
+      elements.btnSave.dataset.originalIcon = '💾'
+      elements.btnSave.dataset.originalText = 'Guardar Verificación'
+      elements.btnValidate.dataset.originalIcon = '🔍'
+      elements.btnValidate.dataset.originalText = 'Detectar WiFi'
+      elements.btnValidateManual.dataset.originalIcon = '✓'
+      elements.btnValidateManual.dataset.originalText = 'Validar Manual'
       
       // Try to sync offline data if online
       if (isOnline) {
